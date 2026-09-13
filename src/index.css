@@ -13,6 +13,10 @@
   --color-brand-600: #2563eb;
 }
 
+html {
+  color-scheme: dark;
+}
+
 html,
 body,
 #root {
