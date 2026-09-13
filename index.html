@@ -2,6 +2,21 @@
 <html lang="es">
   <head>
     <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self';
+        script-src 'self' https://www.gstatic.com https://www.google.com https://www.recaptcha.net;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src https://fonts.gstatic.com;
+        img-src 'self' data:;
+        connect-src 'self' https://*.googleapis.com https://*.google.com;
+        frame-src https://*.firebaseapp.com https://www.google.com https://www.recaptcha.net;
+        base-uri 'self';
+        form-action 'self';
+        frame-ancestors 'self';
+        object-src 'none';"
+    />
+    <meta http-equiv="Referrer-Policy" content="strict-origin-when-cross-origin" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
