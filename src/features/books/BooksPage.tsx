@@ -16,7 +16,7 @@ export function BooksPage() {
       {loading && <p className="text-gray-500">Cargando…</p>}
       {!loading && books.length === 0 && <p className="text-gray-500">Todavía no cargaste libros.</p>}
 
-      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+      <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         {books.map((book) => (
           <BookItem
             key={book.id}

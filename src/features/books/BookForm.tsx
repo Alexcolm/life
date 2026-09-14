@@ -54,12 +54,12 @@ export function BookForm({ onSubmit }: BookFormProps) {
       <button
         type="button"
         onClick={() => fileInputRef.current?.click()}
-        className="flex h-24 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-app-border bg-app-surface-2 text-gray-500 hover:border-blue-400 hover:text-blue-300"
+        className="flex h-40 w-28 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-dashed border-app-border bg-app-surface-2 text-gray-500 hover:border-blue-400 hover:text-blue-300"
       >
         {coverDataUrl ? (
           <img src={coverDataUrl} alt="" className="h-full w-full object-cover" />
         ) : (
-          <ImagePlus size={20} />
+          <ImagePlus size={28} />
         )}
       </button>
       <input ref={fileInputRef} type="file" accept="image/*" onChange={handleFileChange} className="hidden" />

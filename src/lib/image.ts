@@ -1,5 +1,5 @@
 /** Redimensiona/comprime una imagen en el navegador y la devuelve como data URL, lista para guardar en Firestore. */
-export function fileToCompressedDataUrl(file: File, maxWidth = 360, quality = 0.75): Promise<string> {
+export function fileToCompressedDataUrl(file: File, maxWidth = 480, quality = 0.78): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader()
     reader.onerror = () => reject(reader.error)
