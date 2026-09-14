@@ -2,14 +2,16 @@ import {
   addDoc,
   deleteDoc,
   doc,
+  getDocs,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
   updateDoc,
+  where,
 } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { tasksCollection } from '../../firebase/firestore'
+import { notesCollection, tasksCollection } from '../../firebase/firestore'
 import { orderBetween } from '../../lib/order'
 import type { Task, TaskFrequency, TaskPriority } from '../../types/task'
 
@@ -61,10 +63,18 @@ export function useTasks() {
   }
 
   async function toggleCompleted(task: Task) {
+    const completed = !task.completed
     await updateDoc(doc(tasksCollection, task.id), {
-      completed: !task.completed,
+      completed,
       updatedAt: serverTimestamp(),
     })
+
+    if (completed) {
+      // Las notas asociadas a una tarea son "notas de trabajo" para esa tarea:
+      // pierden sentido apenas se completa, así que se borran con ella.
+      const linkedNotes = await getDocs(query(notesCollection, where('taskId', '==', task.id)))
+      await Promise.all(linkedNotes.docs.map((noteDoc) => deleteDoc(noteDoc.ref)))
+    }
   }
 
   async function removeTask(id: string) {

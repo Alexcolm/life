@@ -2,9 +2,11 @@ import { HashRouter, Route, Routes } from 'react-router-dom'
 import { AuthProvider } from './auth/AuthContext'
 import { LoginPage } from './auth/LoginPage'
 import { RequireAuth } from './auth/RequireAuth'
+import { BooksPage } from './features/books/BooksPage'
 import { CalendarPage } from './features/calendar/CalendarPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { GoalsPage } from './features/goals/GoalsPage'
+import { NotesPage } from './features/notes/NotesPage'
 import { NutritionPage } from './features/nutrition/NutritionPage'
 import { RoutinesPage } from './features/routines/RoutinesPage'
 import { TasksPage } from './features/tasks/TasksPage'
@@ -32,6 +34,16 @@ export function App() {
               <RequireAuth>
                 <AppShell>
                   <TasksPage />
+                </AppShell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/notas"
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <NotesPage />
                 </AppShell>
               </RequireAuth>
             }
@@ -72,6 +84,16 @@ export function App() {
               <RequireAuth>
                 <AppShell>
                   <NutritionPage />
+                </AppShell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/libros"
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <BooksPage />
                 </AppShell>
               </RequireAuth>
             }
