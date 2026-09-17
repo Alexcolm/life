@@ -1,10 +1,42 @@
 import { FileText, Link2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getLocalFile } from '../../lib/localFiles'
 import type { Resource } from '../../types/resource'
 
 interface ResourceListProps {
   resources: Resource[]
-  onRemove: (id: string) => void
+  onRemove: (resource: Resource) => void
+}
+
+function PdfPreview({ resource }: { resource: Resource }) {
+  const [objectUrl, setObjectUrl] = useState<string | null | 'missing'>(null)
+
+  useEffect(() => {
+    let currentUrl: string | null = null
+    getLocalFile(resource.id).then((blob) => {
+      if (!blob) {
+        setObjectUrl('missing')
+        return
+      }
+      currentUrl = URL.createObjectURL(blob)
+      setObjectUrl(currentUrl)
+    })
+    return () => {
+      if (currentUrl) URL.revokeObjectURL(currentUrl)
+    }
+  }, [resource.id])
+
+  if (objectUrl === 'missing') {
+    return (
+      <p className="p-6 text-center text-sm text-gray-500">
+        Este PDF se guardó localmente en otro dispositivo — no está disponible en este.
+      </p>
+    )
+  }
+  if (!objectUrl) {
+    return <p className="p-6 text-center text-sm text-gray-500">Cargando…</p>
+  }
+  return <iframe src={objectUrl} className="h-[75vh] w-full" title={resource.label} />
 }
 
 export function ResourceList({ resources, onRemove }: ResourceListProps) {
@@ -30,6 +62,7 @@ export function ResourceList({ resources, onRemove }: ResourceListProps) {
               <button onClick={() => setPreview(r)} className="flex items-center gap-1 hover:text-blue-300">
                 <FileText size={12} />
                 {r.label}
+                <span className="text-gray-500">(local)</span>
               </button>
             )}
             {r.type === 'link' && r.url && (
@@ -44,7 +77,7 @@ export function ResourceList({ resources, onRemove }: ResourceListProps) {
               </a>
             )}
             <button
-              onClick={() => onRemove(r.id)}
+              onClick={() => onRemove(r)}
               className="text-gray-500 opacity-0 hover:text-red-400 group-hover:opacity-100"
               aria-label="Quitar recurso"
             >
@@ -72,9 +105,7 @@ export function ResourceList({ resources, onRemove }: ResourceListProps) {
             {preview.type === 'image' && preview.dataUrl && (
               <img src={preview.dataUrl} alt="" className="max-h-[75vh] w-full object-contain" />
             )}
-            {preview.type === 'pdf' && preview.dataUrl && (
-              <iframe src={preview.dataUrl} className="h-[75vh] w-full" title={preview.label} />
-            )}
+            {preview.type === 'pdf' && <PdfPreview resource={preview} />}
           </div>
         </div>
       )}

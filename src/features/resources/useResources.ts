@@ -1,11 +1,9 @@
 import { addDoc, deleteDoc, doc, onSnapshot, orderBy, query, serverTimestamp } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
-import { fileToDataUrl } from '../../lib/file'
-import { fileToCompressedDataUrl } from '../../lib/image'
 import { resourcesCollection } from '../../firebase/firestore'
+import { fileToCompressedDataUrl } from '../../lib/image'
+import { deleteLocalFile, saveLocalFile } from '../../lib/localFiles'
 import type { Resource } from '../../types/resource'
-
-const MAX_PDF_DATA_URL_LENGTH = 700_000 // ~500 KB de archivo original en base64
 
 export function useResources() {
   const [resources, setResources] = useState<Resource[]>([])
@@ -24,6 +22,7 @@ export function useResources() {
             label: data.label,
             url: data.url ?? null,
             dataUrl: data.dataUrl ?? null,
+            localOnly: !!data.localOnly,
             createdAt: data.createdAt?.toMillis?.() ?? 0,
           } as Resource
         }),
@@ -44,6 +43,7 @@ export function useResources() {
       label,
       url,
       dataUrl: null,
+      localOnly: false,
       createdAt: serverTimestamp(),
     })
   }
@@ -56,27 +56,31 @@ export function useResources() {
       label,
       url: null,
       dataUrl,
+      localOnly: false,
       createdAt: serverTimestamp(),
     })
   }
 
   async function addPdf(nodeId: string, label: string, file: File) {
-    const dataUrl = await fileToDataUrl(file)
-    if (dataUrl.length > MAX_PDF_DATA_URL_LENGTH) {
-      throw new Error('El PDF pesa demasiado (máx. ~500 KB). Subilo a Drive y adjuntá el link en su lugar.')
-    }
-    await addDoc(resourcesCollection, {
+    // El PDF se guarda en el disco de este dispositivo (IndexedDB), no en Firestore:
+    // no sincroniza a otros dispositivos, pero no tiene límite práctico de tamaño.
+    const ref = await addDoc(resourcesCollection, {
       nodeId,
       type: 'pdf',
       label,
       url: null,
-      dataUrl,
+      dataUrl: null,
+      localOnly: true,
       createdAt: serverTimestamp(),
     })
+    await saveLocalFile(ref.id, file)
   }
 
-  async function removeResource(id: string) {
-    await deleteDoc(doc(resourcesCollection, id))
+  async function removeResource(resource: Resource) {
+    await deleteDoc(doc(resourcesCollection, resource.id))
+    if (resource.localOnly) {
+      await deleteLocalFile(resource.id)
+    }
   }
 
   return { resources, loading, byNode, addLink, addImage, addPdf, removeResource }

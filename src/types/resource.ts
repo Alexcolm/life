@@ -6,6 +6,7 @@ export interface Resource {
   type: ResourceType
   label: string
   url: string | null // para type 'link'
-  dataUrl: string | null // para type 'image' | 'pdf'
+  dataUrl: string | null // para type 'image' (comprimida, sí sincroniza vía Firestore)
+  localOnly: boolean // true para 'pdf': el archivo vive en IndexedDB de este dispositivo, no en Firestore
   createdAt: number
 }

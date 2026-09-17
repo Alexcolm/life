@@ -16,7 +16,7 @@ interface TreeNodeViewProps {
   onAddLink: (nodeId: string, label: string, url: string) => Promise<void>
   onAddImage: (nodeId: string, label: string, file: File) => Promise<void>
   onAddPdf: (nodeId: string, label: string, file: File) => Promise<void>
-  onRemoveResource: (id: string) => void
+  onRemoveResource: (resource: Resource) => void
 }
 
 export function TreeNodeView({
