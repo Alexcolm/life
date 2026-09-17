@@ -36,7 +36,7 @@ function PdfPreview({ resource }: { resource: Resource }) {
   if (!objectUrl) {
     return <p className="p-6 text-center text-sm text-gray-500">Cargando…</p>
   }
-  return <iframe src={objectUrl} className="h-[75vh] w-full" title={resource.label} />
+  return <iframe src={objectUrl} className="h-full w-full" title={resource.label} />
 }
 
 export function ResourceList({ resources, onRemove }: ResourceListProps) {
@@ -88,22 +88,19 @@ export function ResourceList({ resources, onRemove }: ResourceListProps) {
       </div>
 
       {preview && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4"
-          onClick={() => setPreview(null)}
-        >
-          <div
-            className="flex max-h-[85vh] w-full max-w-3xl flex-col overflow-hidden rounded-xl bg-app-surface"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between border-b border-app-border px-3 py-2">
-              <span className="truncate text-sm text-gray-200">{preview.label}</span>
-              <button onClick={() => setPreview(null)} className="shrink-0 text-gray-400 hover:text-gray-200">
-                ✕
-              </button>
-            </div>
+        <div className="safe-top safe-bottom fixed inset-0 z-50 flex flex-col bg-app-bg">
+          <div className="flex items-center justify-between border-b border-app-border px-4 py-3">
+            <span className="truncate text-sm font-medium text-gray-200">{preview.label}</span>
+            <button
+              onClick={() => setPreview(null)}
+              className="shrink-0 rounded-lg bg-app-surface-2 px-3 py-1.5 text-sm text-gray-300 hover:text-white"
+            >
+              Cerrar ✕
+            </button>
+          </div>
+          <div className="flex flex-1 items-center justify-center overflow-auto">
             {preview.type === 'image' && preview.dataUrl && (
-              <img src={preview.dataUrl} alt="" className="max-h-[75vh] w-full object-contain" />
+              <img src={preview.dataUrl} alt="" className="max-h-full max-w-full object-contain" />
             )}
             {preview.type === 'pdf' && <PdfPreview resource={preview} />}
           </div>
