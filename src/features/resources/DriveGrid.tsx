@@ -1,7 +1,32 @@
 import { FileText, Link2, Trash2 } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { getLocalFile } from '../../lib/localFiles'
+import { renderPdfThumbnail } from '../../lib/pdfThumbnail'
 import type { Resource } from '../../types/resource'
 import { ResourcePreviewModal } from './ResourcePreviewModal'
+
+function PdfThumb({ resource }: { resource: Resource }) {
+  const [thumb, setThumb] = useState<string | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    getLocalFile(resource.id).then(async (blob) => {
+      if (!blob) return
+      try {
+        const dataUrl = await renderPdfThumbnail(blob)
+        if (!cancelled) setThumb(dataUrl)
+      } catch {
+        // si falla el render, se queda con el ícono genérico
+      }
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [resource.id])
+
+  if (thumb) return <img src={thumb} alt="" className="h-full w-full object-cover" />
+  return <FileText size={26} className="text-gray-400" />
+}
 
 interface DriveGridProps {
   resources: Resource[]
@@ -38,7 +63,7 @@ export function DriveGrid({ resources, onRemove }: DriveGridProps) {
               {r.type === 'image' && r.dataUrl ? (
                 <img src={r.dataUrl} alt="" className="h-full w-full object-cover" />
               ) : r.type === 'pdf' ? (
-                <FileText size={26} className="text-gray-400" />
+                <PdfThumb resource={r} />
               ) : (
                 <Link2 size={26} className="text-gray-400" />
               )}
