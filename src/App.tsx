@@ -4,6 +4,7 @@ import { LoginPage } from './auth/LoginPage'
 import { RequireAuth } from './auth/RequireAuth'
 import { BooksPage } from './features/books/BooksPage'
 import { CalendarPage } from './features/calendar/CalendarPage'
+import { CareerPage } from './features/career/CareerPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
 import { GoalsPage } from './features/goals/GoalsPage'
 import { NotesPage } from './features/notes/NotesPage'
@@ -54,6 +55,16 @@ export function App() {
               <RequireAuth>
                 <AppShell>
                   <GoalsPage />
+                </AppShell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/carrera"
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <CareerPage />
                 </AppShell>
               </RequireAuth>
             }

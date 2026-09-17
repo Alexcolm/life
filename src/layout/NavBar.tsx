@@ -1,6 +1,7 @@
 import {
   BookOpen,
   CalendarDays,
+  GraduationCap,
   Home,
   ListChecks,
   Repeat,
@@ -15,6 +16,7 @@ const links = [
   { to: '/tareas', label: 'Tareas', icon: ListChecks },
   { to: '/notas', label: 'Notas', icon: StickyNote },
   { to: '/metas', label: 'Metas', icon: Target },
+  { to: '/carrera', label: 'Carrera', icon: GraduationCap },
   { to: '/rutinas', label: 'Rutinas', icon: Repeat },
   { to: '/calendario', label: 'Calendario', icon: CalendarDays },
   { to: '/nutricion', label: 'Nutrición', icon: Salad },

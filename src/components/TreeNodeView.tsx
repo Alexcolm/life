@@ -1,21 +1,45 @@
+import { Paperclip } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
-import { goalProgress, type GoalNode } from '../../types/goal'
+import { ResourceForm } from '../features/resources/ResourceForm'
+import { ResourceList } from '../features/resources/ResourceList'
+import { goalProgress, type GoalNode } from '../types/goal'
+import type { Resource } from '../types/resource'
 
-interface GoalNodeViewProps {
+interface TreeNodeViewProps {
   node: GoalNode
   depth: number
+  childLabel: string
   onToggle: (node: GoalNode) => void
   onAddChild: (parentId: string, title: string) => void
   onRemove: (id: string) => void
+  resourcesByNode: Map<string, Resource[]>
+  onAddLink: (nodeId: string, label: string, url: string) => Promise<void>
+  onAddImage: (nodeId: string, label: string, file: File) => Promise<void>
+  onAddPdf: (nodeId: string, label: string, file: File) => Promise<void>
+  onRemoveResource: (id: string) => void
 }
 
-export function GoalNodeView({ node, depth, onToggle, onAddChild, onRemove }: GoalNodeViewProps) {
+export function TreeNodeView({
+  node,
+  depth,
+  childLabel,
+  onToggle,
+  onAddChild,
+  onRemove,
+  resourcesByNode,
+  onAddLink,
+  onAddImage,
+  onAddPdf,
+  onRemoveResource,
+}: TreeNodeViewProps) {
   const [expanded, setExpanded] = useState(true)
   const [addingChild, setAddingChild] = useState(false)
   const [childTitle, setChildTitle] = useState('')
+  const [showResources, setShowResources] = useState(false)
 
   const progress = goalProgress(node)
   const hasChildren = node.children.length > 0
+  const nodeResources = resourcesByNode.get(node.id) ?? []
 
   function handleAddChild(e: FormEvent) {
     e.preventDefault()
@@ -62,32 +86,40 @@ export function GoalNodeView({ node, depth, onToggle, onAddChild, onRemove }: Go
         )}
 
         <button
+          onClick={() => setShowResources((v) => !v)}
+          className={`shrink-0 rounded p-1 text-xs ${
+            nodeResources.length > 0 ? 'text-blue-300' : 'text-gray-500 hover:text-blue-300'
+          }`}
+          aria-label="Adjuntos"
+        >
+          <span className="flex items-center gap-0.5">
+            <Paperclip size={13} />
+            {nodeResources.length > 0 && nodeResources.length}
+          </span>
+        </button>
+        <button
           onClick={() => setAddingChild((v) => !v)}
           className="shrink-0 rounded p-1 text-xs text-gray-500 hover:text-blue-300"
-          aria-label="Agregar sub-meta"
+          aria-label={`Agregar ${childLabel}`}
         >
-          + desafío
+          + {childLabel}
         </button>
         <button
           onClick={() => onRemove(node.id)}
           className="shrink-0 rounded p-1 text-gray-500 hover:text-red-400"
-          aria-label="Eliminar meta"
+          aria-label="Eliminar"
         >
           ✕
         </button>
       </div>
 
       {addingChild && (
-        <form
-          onSubmit={handleAddChild}
-          className="mt-1 flex gap-2"
-          style={{ marginLeft: 20 }}
-        >
+        <form onSubmit={handleAddChild} className="mt-1 flex gap-2" style={{ marginLeft: 20 }}>
           <input
             autoFocus
             value={childTitle}
             onChange={(e) => setChildTitle(e.target.value)}
-            placeholder="Nuevo desafío/sub-meta…"
+            placeholder={`Nuevo/a ${childLabel}…`}
             className="flex-1 rounded-lg border border-app-border bg-app-surface-2 px-3 py-1.5 text-sm text-gray-100 outline-none focus:border-blue-400"
           />
           <button
@@ -99,16 +131,33 @@ export function GoalNodeView({ node, depth, onToggle, onAddChild, onRemove }: Go
         </form>
       )}
 
+      {showResources && (
+        <div className="mt-1 flex flex-col gap-2" style={{ marginLeft: 20 }}>
+          <ResourceList resources={nodeResources} onRemove={onRemoveResource} />
+          <ResourceForm
+            onAddLink={(label, url) => onAddLink(node.id, label, url)}
+            onAddImage={(label, file) => onAddImage(node.id, label, file)}
+            onAddPdf={(label, file) => onAddPdf(node.id, label, file)}
+          />
+        </div>
+      )}
+
       {expanded && hasChildren && (
         <div className="mt-1 flex flex-col gap-1">
           {node.children.map((child) => (
-            <GoalNodeView
+            <TreeNodeView
               key={child.id}
               node={child}
               depth={depth + 1}
+              childLabel={childLabel}
               onToggle={onToggle}
               onAddChild={onAddChild}
               onRemove={onRemove}
+              resourcesByNode={resourcesByNode}
+              onAddLink={onAddLink}
+              onAddImage={onAddImage}
+              onAddPdf={onAddPdf}
+              onRemoveResource={onRemoveResource}
             />
           ))}
         </div>
