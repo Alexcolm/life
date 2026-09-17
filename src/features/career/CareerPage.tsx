@@ -1,9 +1,10 @@
 import { ChevronRight, FolderOpen, GraduationCap, Plus } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { PageHeader } from '../../components/PageHeader'
+import { DriveGrid } from '../resources/DriveGrid'
+import { ResourceForm } from '../resources/ResourceForm'
 import type { GoalNode } from '../../types/goal'
 import { useResources } from '../resources/useResources'
-import { SubjectCard } from './SubjectCard'
 import { moveOrImportCurriculum } from './moveOrImportCurriculum'
 import { useCareer } from './useCareer'
 
@@ -22,7 +23,7 @@ function findPath(roots: GoalNode[], targetId: string): GoalNode[] | null {
   return null
 }
 
-// Nivel 0 = curso (título grande), nivel 1 = semestre (subtítulo), nivel 2+ = otros
+// Nivel 0 = curso (título grande), nivel 1 = semestre (subtítulo), nivel 2+ = materia
 const FOLDER_TEXT_BY_DEPTH = [
   'font-display text-base font-semibold text-gray-100',
   'text-sm font-medium text-gray-200',
@@ -43,15 +44,9 @@ export function CareerPage() {
   const path = currentId ? findPath(tree, currentId) : singleRoot ? [singleRoot] : []
   const currentNode = path && path.length > 0 ? path[path.length - 1] : null
   const children = currentNode ? currentNode.children : tree
-  const isLeafLevel = children.length > 0 && children.every((c) => c.children.length === 0)
   const folderDepth = currentId === null ? 0 : (path?.length ?? 1) - 1
 
-  const resourcesByNode = new Map<string, ReturnType<typeof useResources>['resources']>()
-  for (const r of resources) {
-    const list = resourcesByNode.get(r.nodeId) ?? []
-    list.push(r)
-    resourcesByNode.set(r.nodeId, list)
-  }
+  const currentResources = currentNode ? resources.filter((r) => r.nodeId === currentNode.id) : []
 
   async function handleImport() {
     setImporting(true)
@@ -89,7 +84,7 @@ export function CareerPage() {
 
       {tree.length > 0 && (
         <>
-          {/* Migas de pan */}
+          {/* Migas de pan: navegación entre secciones */}
           <div className="mb-4 flex flex-wrap items-center gap-1 text-xs text-gray-500">
             <button
               onClick={() => setCurrentId(null)}
@@ -110,23 +105,8 @@ export function CareerPage() {
             ))}
           </div>
 
-          {isLeafLevel ? (
-            <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
-              {children.map((subject) => (
-                <SubjectCard
-                  key={subject.id}
-                  title={subject.title}
-                  resources={resourcesByNode.get(subject.id) ?? []}
-                  onAddLink={(label, url) => addLink(subject.id, label, url)}
-                  onAddImage={(label, file) => addImage(subject.id, label, file)}
-                  onAddPdf={(label, file) => addPdf(subject.id, label, file)}
-                  onRemoveResource={removeResource}
-                  onRemove={() => removeNode(subject.id)}
-                />
-              ))}
-            </ul>
-          ) : (
-            <ul className="flex flex-col gap-1.5">
+          {children.length > 0 && (
+            <ul className="mb-6 flex flex-col gap-1.5">
               {children.map((folder) => (
                 <li key={folder.id}>
                   <button
@@ -154,15 +134,13 @@ export function CareerPage() {
             </ul>
           )}
 
-          {children.length === 0 && <p className="text-gray-500">Vacío por ahora.</p>}
-
           {adding ? (
-            <form onSubmit={handleAddChild} className="mt-3 flex gap-2">
+            <form onSubmit={handleAddChild} className="mb-6 flex gap-2">
               <input
                 autoFocus
                 value={addingTitle}
                 onChange={(e) => setAddingTitle(e.target.value)}
-                placeholder="Nombre…"
+                placeholder="Nombre de la nueva subcarpeta…"
                 className="flex-1 rounded-lg border border-app-border bg-app-surface-2 px-3 py-2 text-sm text-gray-100 outline-none focus:border-blue-400"
               />
               <button
@@ -175,10 +153,27 @@ export function CareerPage() {
           ) : (
             <button
               onClick={() => setAdding(true)}
-              className="mt-3 flex items-center gap-1 text-sm text-gray-500 hover:text-blue-300"
+              className="mb-6 flex items-center gap-1 text-sm text-gray-500 hover:text-blue-300"
             >
-              <Plus size={14} /> Agregar acá
+              <Plus size={14} /> Agregar subcarpeta acá
             </button>
+          )}
+
+          {/* Mini "drive" de esta sección: archivos propios de este nivel puntual */}
+          {currentNode && (
+            <div>
+              <h2 className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">
+                Archivos de "{currentNode.title}"
+              </h2>
+              <div className="mb-3">
+                <DriveGrid resources={currentResources} onRemove={removeResource} />
+              </div>
+              <ResourceForm
+                onAddLink={(label, url) => addLink(currentNode.id, label, url)}
+                onAddImage={(label, file) => addImage(currentNode.id, label, file)}
+                onAddPdf={(label, file) => addPdf(currentNode.id, label, file)}
+              />
+            </div>
           )}
         </>
       )}
