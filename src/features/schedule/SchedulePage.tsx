@@ -4,17 +4,29 @@ import { useState } from 'react'
 import { PageHeader } from '../../components/PageHeader'
 import { MONTH_LABELS, toISODate } from '../../lib/date'
 import { MonthlyReport } from './MonthlyReport'
+import { getScheduleItemsForDate } from './occurrences'
 import { ScheduleForm } from './ScheduleForm'
 import { ScheduleTable } from './ScheduleTable'
 import { useSchedule } from './useSchedule'
+import { useScheduleCompletions } from './useScheduleCompletions'
+import { useScheduleSubitems } from './useScheduleSubitems'
 
 export function SchedulePage() {
-  const { items, loading, addItem, toggleCompleted, removeItem } = useSchedule()
+  const { items, loading, addItem, updateItem, removeItem, shiftFrom } = useSchedule()
+  const { isDone, toggle } = useScheduleCompletions()
+  const { subitems, addSubitem, removeSubitem } = useScheduleSubitems()
   const [view, setView] = useState<'dia' | 'mes'>('dia')
   const [date, setDate] = useState(() => toISODate(new Date()))
   const [monthDate, setMonthDate] = useState(() => new Date())
 
-  const dayItems = items.filter((i) => i.date === date)
+  const dayItems = getScheduleItemsForDate(items, new Date(date + 'T00:00:00'))
+
+  const subitemsByItem = new Map<string, ReturnType<typeof useScheduleSubitems>['subitems']>()
+  for (const s of subitems) {
+    const list = subitemsByItem.get(s.itemId) ?? []
+    list.push(s)
+    subitemsByItem.set(s.itemId, list)
+  }
 
   return (
     <div>
@@ -79,11 +91,24 @@ export function SchedulePage() {
       {!loading && view === 'dia' && (
         <>
           <ScheduleForm date={date} onSubmit={addItem} />
-          <ScheduleTable items={dayItems} onToggle={toggleCompleted} onRemove={removeItem} />
+          <ScheduleTable
+            items={dayItems}
+            date={date}
+            isDone={isDone}
+            onToggleDone={toggle}
+            onRemove={removeItem}
+            onUpdate={updateItem}
+            onShiftFrom={(item, actualTime) => shiftFrom(dayItems, item, actualTime)}
+            subitemsByItem={subitemsByItem}
+            onAddSubitem={addSubitem}
+            onRemoveSubitem={removeSubitem}
+          />
         </>
       )}
 
-      {!loading && view === 'mes' && <MonthlyReport items={items} monthDate={monthDate} />}
+      {!loading && view === 'mes' && (
+        <MonthlyReport items={items} monthDate={monthDate} isDone={isDone} />
+      )}
     </div>
   )
 }

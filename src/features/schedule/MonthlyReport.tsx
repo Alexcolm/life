@@ -1,25 +1,28 @@
-import { format } from 'date-fns'
+import { eachDayOfInterval, endOfMonth, startOfMonth } from 'date-fns'
+import { toISODate } from '../../lib/date'
 import type { ScheduleItem } from '../../types/schedule'
+import { getScheduleItemsForDate } from './occurrences'
 
 interface MonthlyReportProps {
   items: ScheduleItem[]
   monthDate: Date
+  isDone: (id: string, date: string) => boolean
 }
 
-export function MonthlyReport({ items, monthDate }: MonthlyReportProps) {
-  const monthPrefix = format(monthDate, 'yyyy-MM')
-  const monthItems = items.filter((i) => i.date.startsWith(monthPrefix))
+export function MonthlyReport({ items, monthDate, isDone }: MonthlyReportProps) {
+  const days = eachDayOfInterval({ start: startOfMonth(monthDate), end: endOfMonth(monthDate) })
 
-  const byDate = new Map<string, ScheduleItem[]>()
-  for (const item of monthItems) {
-    const list = byDate.get(item.date) ?? []
-    list.push(item)
-    byDate.set(item.date, list)
-  }
-  const dates = Array.from(byDate.keys()).sort()
+  const rows = days
+    .map((day) => {
+      const iso = toISODate(day)
+      const dueItems = getScheduleItemsForDate(items, day)
+      const done = dueItems.filter((item) => isDone(item.id, iso)).length
+      return { iso, total: dueItems.length, done }
+    })
+    .filter((row) => row.total > 0)
 
-  const total = monthItems.length
-  const totalDone = monthItems.filter((i) => i.completed).length
+  const total = rows.reduce((sum, r) => sum + r.total, 0)
+  const totalDone = rows.reduce((sum, r) => sum + r.done, 0)
   const pct = total > 0 ? Math.round((totalDone / total) * 100) : 0
 
   return (
@@ -36,8 +39,8 @@ export function MonthlyReport({ items, monthDate }: MonthlyReportProps) {
         </span>
       </div>
 
-      {dates.length === 0 ? (
-        <p className="text-gray-500">Sin actividades cargadas este mes.</p>
+      {rows.length === 0 ? (
+        <p className="text-gray-500">Sin actividades este mes.</p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-app-border">
           <table className="w-full min-w-[420px] border-collapse text-sm">
@@ -50,15 +53,13 @@ export function MonthlyReport({ items, monthDate }: MonthlyReportProps) {
               </tr>
             </thead>
             <tbody>
-              {dates.map((date) => {
-                const dayItems = byDate.get(date)!
-                const done = dayItems.filter((i) => i.completed).length
-                const dayPct = Math.round((done / dayItems.length) * 100)
+              {rows.map((row) => {
+                const dayPct = Math.round((row.done / row.total) * 100)
                 return (
-                  <tr key={date} className="border-b border-app-border/60 bg-app-surface last:border-0">
-                    <td className="px-3 py-2 text-gray-100">{date}</td>
-                    <td className="px-3 py-2 text-center text-gray-300">{dayItems.length}</td>
-                    <td className="px-3 py-2 text-center text-gray-300">{done}</td>
+                  <tr key={row.iso} className="border-b border-app-border/60 bg-app-surface last:border-0">
+                    <td className="px-3 py-2 text-gray-100">{row.iso}</td>
+                    <td className="px-3 py-2 text-center text-gray-300">{row.total}</td>
+                    <td className="px-3 py-2 text-center text-gray-300">{row.done}</td>
                     <td className="px-3 py-2 text-center text-blue-300">{dayPct}%</td>
                   </tr>
                 )
