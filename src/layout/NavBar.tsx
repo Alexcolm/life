@@ -1,6 +1,7 @@
 import {
   BookOpen,
   CalendarDays,
+  Clock,
   GraduationCap,
   Home,
   ListChecks,
@@ -14,6 +15,7 @@ import { NavLink } from 'react-router-dom'
 const links = [
   { to: '/', label: 'Inicio', icon: Home, end: true },
   { to: '/tareas', label: 'Tareas', icon: ListChecks },
+  { to: '/horario', label: 'Horario', icon: Clock },
   { to: '/notas', label: 'Notas', icon: StickyNote },
   { to: '/metas', label: 'Metas', icon: Target },
   { to: '/carrera', label: 'Carrera', icon: GraduationCap },

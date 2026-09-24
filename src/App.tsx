@@ -10,6 +10,7 @@ import { GoalsPage } from './features/goals/GoalsPage'
 import { NotesPage } from './features/notes/NotesPage'
 import { NutritionPage } from './features/nutrition/NutritionPage'
 import { RoutinesPage } from './features/routines/RoutinesPage'
+import { SchedulePage } from './features/schedule/SchedulePage'
 import { TasksPage } from './features/tasks/TasksPage'
 import { AppShell } from './layout/AppShell'
 
@@ -35,6 +36,16 @@ export function App() {
               <RequireAuth>
                 <AppShell>
                   <TasksPage />
+                </AppShell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/horario"
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <SchedulePage />
                 </AppShell>
               </RequireAuth>
             }
