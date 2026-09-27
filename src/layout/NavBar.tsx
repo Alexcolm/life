@@ -1,5 +1,6 @@
 import {
   BookOpen,
+  Bus,
   CalendarDays,
   Clock,
   GraduationCap,
@@ -21,6 +22,7 @@ const links = [
   { to: '/carrera', label: 'Carrera', icon: GraduationCap },
   { to: '/rutinas', label: 'Rutinas', icon: Repeat },
   { to: '/calendario', label: 'Calendario', icon: CalendarDays },
+  { to: '/colectivos', label: 'Colectivos', icon: Bus },
   { to: '/nutricion', label: 'Nutrición', icon: Salad },
   { to: '/libros', label: 'Libros', icon: BookOpen },
 ]

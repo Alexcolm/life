@@ -12,6 +12,7 @@ import { NutritionPage } from './features/nutrition/NutritionPage'
 import { RoutinesPage } from './features/routines/RoutinesPage'
 import { SchedulePage } from './features/schedule/SchedulePage'
 import { TasksPage } from './features/tasks/TasksPage'
+import { TransportPage } from './features/transport/TransportPage'
 import { AppShell } from './layout/AppShell'
 
 export function App() {
@@ -106,6 +107,16 @@ export function App() {
               <RequireAuth>
                 <AppShell>
                   <NutritionPage />
+                </AppShell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/colectivos"
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <TransportPage />
                 </AppShell>
               </RequireAuth>
             }
