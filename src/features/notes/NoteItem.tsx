@@ -124,6 +124,10 @@ function ShoppingNoteCard({ note, linkedTask, onUpdate, onRemove }: NoteItemProp
     onUpdate({ items: note.items.filter((i) => i.id !== id) })
   }
 
+  function updateItem(id: string, patch: Partial<Pick<ShoppingItem, 'name' | 'price'>>) {
+    onUpdate({ items: note.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })
+  }
+
   return (
     <li className="rounded-xl border border-app-border bg-app-surface p-3">
       <div className="mb-1 flex items-start justify-between gap-2">
@@ -218,17 +222,7 @@ function ShoppingNoteCard({ note, linkedTask, onUpdate, onRemove }: NoteItemProp
 
       <ul className="mb-2 flex flex-col gap-1">
         {note.items.map((item) => (
-          <li key={item.id} className="group flex items-center gap-2 text-sm">
-            <span className="min-w-0 flex-1 truncate text-gray-200">{item.name}</span>
-            <span className="shrink-0 font-medium text-gray-100">{formatGs(item.price)}</span>
-            <button
-              onClick={() => removeItem(item.id)}
-              className="shrink-0 text-gray-600 opacity-0 hover:text-red-400 group-hover:opacity-100"
-              aria-label="Quitar producto"
-            >
-              ✕
-            </button>
-          </li>
+          <ShoppingItemRow key={item.id} item={item} onUpdate={updateItem} onRemove={removeItem} />
         ))}
         {note.items.length === 0 && <li className="text-sm text-gray-600">Sin productos cargados.</li>}
       </ul>
@@ -275,6 +269,86 @@ function ShoppingNoteCard({ note, linkedTask, onUpdate, onRemove }: NoteItemProp
           Se borra al completar: {linkedTask.title}
         </p>
       )}
+    </li>
+  )
+}
+
+function ShoppingItemRow({
+  item,
+  onUpdate,
+  onRemove,
+}: {
+  item: ShoppingItem
+  onUpdate: (id: string, patch: Partial<Pick<ShoppingItem, 'name' | 'price'>>) => void
+  onRemove: (id: string) => void
+}) {
+  const [editingName, setEditingName] = useState(false)
+  const [name, setName] = useState(item.name)
+  const [editingPrice, setEditingPrice] = useState(false)
+  const [price, setPrice] = useState(String(item.price))
+
+  function saveName() {
+    setEditingName(false)
+    const trimmed = name.trim()
+    if (trimmed && trimmed !== item.name) onUpdate(item.id, { name: trimmed })
+    else setName(item.name)
+  }
+
+  function savePrice() {
+    setEditingPrice(false)
+    const parsed = Number(price)
+    if (parsed >= 0 && parsed !== item.price) onUpdate(item.id, { price: parsed })
+    else setPrice(String(item.price))
+  }
+
+  return (
+    <li className="group flex items-center gap-2 text-sm">
+      {editingName ? (
+        <input
+          autoFocus
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          onBlur={saveName}
+          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+          className="min-w-0 flex-1 rounded-md border border-blue-400 bg-app-surface-2 px-1.5 py-0.5 text-sm text-gray-100 outline-none"
+        />
+      ) : (
+        <button
+          onClick={() => setEditingName(true)}
+          className="min-w-0 flex-1 truncate rounded px-0.5 text-left text-gray-200 hover:bg-app-surface-2"
+        >
+          {item.name}
+        </button>
+      )}
+
+      {editingPrice ? (
+        <input
+          autoFocus
+          type="number"
+          inputMode="numeric"
+          min={0}
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+          onBlur={savePrice}
+          onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
+          className="w-20 shrink-0 rounded-md border border-blue-400 bg-app-surface-2 px-1.5 py-0.5 text-sm text-gray-100 outline-none"
+        />
+      ) : (
+        <button
+          onClick={() => setEditingPrice(true)}
+          className="shrink-0 rounded px-1 font-medium text-gray-100 hover:bg-app-surface-2"
+        >
+          {formatGs(item.price)}
+        </button>
+      )}
+
+      <button
+        onClick={() => onRemove(item.id)}
+        className="shrink-0 text-gray-600 opacity-0 hover:text-red-400 group-hover:opacity-100"
+        aria-label="Quitar producto"
+      >
+        ✕
+      </button>
     </li>
   )
 }
