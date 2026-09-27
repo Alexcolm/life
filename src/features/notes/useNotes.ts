@@ -15,8 +15,11 @@ export function useNotes() {
           const data = d.data()
           return {
             id: d.id,
+            type: data.type ?? 'texto',
             title: data.title,
             description: data.description,
+            store: data.store ?? null,
+            items: data.items ?? [],
             taskId: data.taskId ?? null,
             createdAt: data.createdAt?.toMillis?.() ?? 0,
             updatedAt: data.updatedAt?.toMillis?.() ?? 0,
@@ -28,9 +31,16 @@ export function useNotes() {
     return unsubscribe
   }, [])
 
-  async function addNote(input: { title: string; description: string; taskId: string | null }) {
+  async function addNote(input: {
+    type: Note['type']
+    title: string
+    description: string
+    store: string | null
+    taskId: string | null
+  }) {
     await addDoc(notesCollection, {
       ...input,
+      items: [],
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     })
@@ -38,7 +48,7 @@ export function useNotes() {
 
   async function updateNote(
     id: string,
-    input: Partial<{ title: string; description: string; taskId: string | null }>,
+    input: Partial<Pick<Note, 'title' | 'description' | 'store' | 'items'>>,
   ) {
     await updateDoc(doc(notesCollection, id), { ...input, updatedAt: serverTimestamp() })
   }
