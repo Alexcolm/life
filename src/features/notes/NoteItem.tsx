@@ -1,6 +1,7 @@
-import { Link2, Plus, Store } from 'lucide-react'
+import { ChevronDown, ChevronUp, ExternalLink, Link2, MapPin, Plus, Store } from 'lucide-react'
 import { useState, type FormEvent } from 'react'
 import { formatGs } from '../../lib/currency'
+import { mapsEmbedUrl, mapsSearchUrl } from '../../lib/maps'
 import type { Note, ShoppingItem } from '../../types/note'
 import type { Task } from '../../types/task'
 
@@ -90,6 +91,7 @@ function ShoppingNoteCard({ note, linkedTask, onUpdate, onRemove }: NoteItemProp
   const [title, setTitle] = useState(note.title)
   const [editingStore, setEditingStore] = useState(false)
   const [store, setStore] = useState(note.store ?? '')
+  const [showMap, setShowMap] = useState(false)
   const [adding, setAdding] = useState(false)
   const [name, setName] = useState('')
   const [price, setPrice] = useState('')
@@ -158,17 +160,60 @@ function ShoppingNoteCard({ note, linkedTask, onUpdate, onRemove }: NoteItemProp
           onChange={(e) => setStore(e.target.value)}
           onBlur={saveStore}
           onKeyDown={(e) => e.key === 'Enter' && e.currentTarget.blur()}
-          placeholder="¿Dónde vas a comprar?"
+          placeholder="¿Dónde vas a comprar? (nombre o dirección)"
           className="mb-2 w-full rounded-lg border border-blue-400 bg-app-surface-2 px-2 py-1 text-xs text-gray-100 outline-none"
         />
       ) : (
-        <button
-          onClick={() => setEditingStore(true)}
-          className="mb-2 flex items-center gap-1 text-xs text-gray-500 hover:text-blue-300"
-        >
-          <Store size={12} />
-          {note.store || 'Agregar local…'}
-        </button>
+        <div className="mb-2 flex items-center gap-1">
+          <button
+            onClick={() => setEditingStore(true)}
+            className="flex min-w-0 flex-1 items-center gap-1 text-xs text-gray-500 hover:text-blue-300"
+          >
+            <Store size={12} />
+            <span className="truncate">{note.store || 'Agregar local…'}</span>
+          </button>
+          {note.store && (
+            <>
+              <a
+                href={mapsSearchUrl(note.store)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                title="Abrir en Google Maps"
+                className="shrink-0 rounded p-0.5 text-gray-500 hover:text-blue-300"
+              >
+                <MapPin size={13} />
+              </a>
+              <button
+                onClick={() => setShowMap((v) => !v)}
+                title="Vista previa del mapa"
+                className="shrink-0 rounded p-0.5 text-gray-500 hover:text-blue-300"
+              >
+                {showMap ? <ChevronUp size={13} /> : <ChevronDown size={13} />}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
+      {note.store && showMap && (
+        <div className="relative mb-2 overflow-hidden rounded-lg border border-app-border">
+          <iframe
+            title={`Mapa de ${note.store}`}
+            src={mapsEmbedUrl(note.store)}
+            className="h-36 w-full border-0"
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+          />
+          <a
+            href={mapsSearchUrl(note.store)}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute right-1.5 bottom-1.5 flex items-center gap-1 rounded-md bg-app-surface/90 px-1.5 py-0.5 text-[10px] text-blue-300 hover:underline"
+          >
+            <ExternalLink size={10} /> Abrir en Maps
+          </a>
+        </div>
       )}
 
       <ul className="mb-2 flex flex-col gap-1">
