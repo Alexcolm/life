@@ -1,3 +1,7 @@
+// es-PY agrupa los miles con "." (105.000), que a simple vista se puede leer como
+// un decimal (105,000 -> "105"). Se usa un separador de espacio para que el monto
+// completo sea inequívoco.
 export function formatGs(amount: number): string {
-  return `${new Intl.NumberFormat('es-PY').format(Math.round(amount))} Gs`
+  const grouped = new Intl.NumberFormat('en-US').format(Math.round(amount)).replace(/,/g, ' ')
+  return `${grouped} Gs`
 }
