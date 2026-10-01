@@ -6,6 +6,7 @@ import { formatGs } from '../../lib/currency'
 import { MONTH_LABELS } from '../../lib/date'
 import { signedAmount, type Transaction } from '../../types/finance'
 import { BudgetForm } from './BudgetForm'
+import { ManualTransactionForm } from './ManualTransactionForm'
 import { TransactionList } from './TransactionList'
 import { useBudget } from './useBudget'
 import { useTransactions } from './useTransactions'
@@ -14,7 +15,7 @@ export function FinancePage() {
   const [monthDate, setMonthDate] = useState(() => new Date())
   const month = format(monthDate, 'yyyy-MM')
 
-  const { transactions, loading: loadingTxns } = useTransactions()
+  const { transactions, loading: loadingTxns, addManualTransaction, removeTransaction } = useTransactions()
   const { budget, loading: loadingBudget, saveBudget } = useBudget(month)
 
   const monthTxns = useMemo(
@@ -106,8 +107,10 @@ export function FinancePage() {
         </div>
       )}
 
+      <ManualTransactionForm onSubmit={addManualTransaction} />
+
       <h3 className="mb-2 text-xs font-medium tracking-wide text-gray-500 uppercase">Movimientos del mes</h3>
-      <TransactionList transactions={monthTxns} />
+      <TransactionList transactions={monthTxns} onRemove={removeTransaction} />
     </div>
   )
 }

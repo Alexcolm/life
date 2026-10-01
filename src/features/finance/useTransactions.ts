@@ -1,7 +1,7 @@
-import { onSnapshot, orderBy, query } from 'firebase/firestore'
+import { addDoc, deleteDoc, doc, onSnapshot, orderBy, query } from 'firebase/firestore'
 import { useEffect, useState } from 'react'
 import { transactionsCollection } from '../../firebase/firestore'
-import type { Transaction } from '../../types/finance'
+import type { Transaction, TransactionType } from '../../types/finance'
 
 export function useTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([])
@@ -21,6 +21,7 @@ export function useTransactions() {
             type: data.type,
             description: data.description ?? '',
             subject: data.subject ?? '',
+            source: data.source ?? 'bank',
           } as Transaction
         }),
       )
@@ -29,5 +30,18 @@ export function useTransactions() {
     return unsubscribe
   }, [])
 
-  return { transactions, loading }
+  async function addManualTransaction(input: { date: number; amount: number; type: TransactionType; description: string }) {
+    await addDoc(transactionsCollection, {
+      ...input,
+      currency: 'PYG',
+      subject: '',
+      source: 'manual',
+    })
+  }
+
+  async function removeTransaction(id: string) {
+    await deleteDoc(doc(transactionsCollection, id))
+  }
+
+  return { transactions, loading, addManualTransaction, removeTransaction }
 }
