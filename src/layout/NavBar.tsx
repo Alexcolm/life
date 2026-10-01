@@ -10,6 +10,7 @@ import {
   Salad,
   StickyNote,
   Target,
+  Wallet,
 } from 'lucide-react'
 import { NavLink } from 'react-router-dom'
 
@@ -23,6 +24,7 @@ const links = [
   { to: '/rutinas', label: 'Rutinas', icon: Repeat },
   { to: '/calendario', label: 'Calendario', icon: CalendarDays },
   { to: '/colectivos', label: 'Colectivos', icon: Bus },
+  { to: '/presupuesto', label: 'Presupuesto', icon: Wallet },
   { to: '/nutricion', label: 'Nutrición', icon: Salad },
   { to: '/libros', label: 'Libros', icon: BookOpen },
 ]

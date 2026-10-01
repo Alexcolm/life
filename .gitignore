@@ -15,6 +15,9 @@ dist-ssr
 # Env vars (see .env.example)
 .env
 
+# Proyecto Flutter aparte (openbanking), no es parte del repo web de LIFE
+openbanking
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json

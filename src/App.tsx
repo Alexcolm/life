@@ -6,6 +6,7 @@ import { BooksPage } from './features/books/BooksPage'
 import { CalendarPage } from './features/calendar/CalendarPage'
 import { CareerPage } from './features/career/CareerPage'
 import { DashboardPage } from './features/dashboard/DashboardPage'
+import { FinancePage } from './features/finance/FinancePage'
 import { GoalsPage } from './features/goals/GoalsPage'
 import { NotesPage } from './features/notes/NotesPage'
 import { NutritionPage } from './features/nutrition/NutritionPage'
@@ -107,6 +108,16 @@ export function App() {
               <RequireAuth>
                 <AppShell>
                   <NutritionPage />
+                </AppShell>
+              </RequireAuth>
+            }
+          />
+          <Route
+            path="/presupuesto"
+            element={
+              <RequireAuth>
+                <AppShell>
+                  <FinancePage />
                 </AppShell>
               </RequireAuth>
             }
